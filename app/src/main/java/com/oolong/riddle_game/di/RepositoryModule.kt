@@ -1,5 +1,9 @@
 package com.oolong.riddle_game.di
 
+import android.app.Application
+import androidx.room.Room
+import com.oolong.riddle_game.data.local.QuizDataDao
+import com.oolong.riddle_game.data.local.QuizDataDataBase
 import com.oolong.riddle_game.data.remote.DictionaryApi
 import com.oolong.riddle_game.data.repository.DictionaryRepositoryImpl
 import com.oolong.riddle_game.domain.repository.IDictionaryRepository
@@ -17,8 +21,14 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideDictionaryRepository(dictionaryApi: DictionaryApi): IDictionaryRepository {
-        return DictionaryRepositoryImpl(dictionaryApi)
+    fun provideDictionaryRepository(
+        dictionaryApi: DictionaryApi,
+        db: QuizDataDataBase
+    ): IDictionaryRepository {
+        return DictionaryRepositoryImpl(
+            dictionaryApi,
+            db.dao
+        )
     }
 
     @Provides
@@ -31,5 +41,15 @@ object RepositoryModule {
     @Singleton
     fun provideGetQuizDataUseCase(repository: IDictionaryRepository): GetSingleQuizDataUseCase {
         return GetSingleQuizDataUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideQuizDataBase(app: Application): QuizDataDataBase {
+        return Room.databaseBuilder(
+            app,
+            QuizDataDataBase::class.java,
+            QuizDataDataBase.DATABASE_NAME
+        ).build()
     }
 }
