@@ -18,6 +18,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.oolong.riddle_game.ui.component.custom_keyboard.KeyboardLayout
 import com.oolong.riddle_game.ui.component.letter_indicator.LetterIndicator
 import kotlinx.coroutines.delay
@@ -25,6 +27,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun GameScreen(
+    navController: NavController = rememberNavController(),
     viewModel: GameScreenViewModel = hiltViewModel(),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -82,7 +85,6 @@ fun GameScreen(
                 viewModel.onEvent(GameScreenEvent.KeyboardInput(letter))
             }
         }
-
     }
 }
 

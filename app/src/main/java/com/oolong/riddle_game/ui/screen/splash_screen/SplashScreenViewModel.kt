@@ -11,6 +11,8 @@ import com.oolong.riddle_game.util.testWords
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -24,49 +26,27 @@ class SplashScreenViewModel @Inject constructor(
     private val _splashScreenState = mutableStateOf(SplashScreenState(emptyList()))
     val splashScreenState: State<SplashScreenState> = _splashScreenState
 
+    private val _splashScreenNavigationEvent = MutableSharedFlow<SplashScreenNavigationEvent>()
+    val splashScreenNavigationEvent: SharedFlow<SplashScreenNavigationEvent> = _splashScreenNavigationEvent
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.d("SplashScreen", "Asd")
             getAllQuizDataUseCase(testWords).collect{ result ->
                 when(result) {
                     is Resource.Error -> {
                         result.errorMessage?.let { Log.d("SplashScreen", it) }
                     }
-                    is Resource.Loading -> TODO()
+                    is Resource.Loading -> { }
                     is Resource.Success -> {
-                        Log.d("SplashScreen", result.data.toString())
                         _splashScreenState.value = splashScreenState.value.copy(
                             quizData = result.data
                         )
+                        _splashScreenNavigationEvent.emit(
+                            SplashScreenNavigationEvent.NavigateToGameScreen
+                        )
                     }
                 }
-
-//                Log.d("SplashScreen", result.data)
-//                _splashScreenState.value = splashScreenState.value.copy(
-//                    quizData = it.data
-//                )
-//                for(entity in it.data) {
-//                        Log.d(
-//                        "SplashScreen",
-//                        "Word: ${entity?.questionWord} \n Question: ${entity.answerMeaning}"
-//                    )
-//                }
             }
-
-//            _splashScreenState.value = splashScreenState.value.copy(
-//                infoText = "Started to pull from remote."
-//            )
-//            getAllQuizDataUseCase(testWords).collect{
-//                for (singleQuizData in it.allQuizData) {
-//                    Log.d(
-//                        "SplashScreen",
-//                        "Word: ${singleQuizData.questionWord} \n Question: ${singleQuizData.answerMeaning}"
-//                    )
-//                }
-//            }
-//            _splashScreenState.value = splashScreenState.value.copy(
-//                infoText = "All words pulled from remote."
-//            )
         }
     }
 }

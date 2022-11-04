@@ -124,8 +124,6 @@ class GameScreenViewModel @Inject constructor(
                                     remainingTime = 0L
                                 )
                         }
-                        Log.d("GameScreen", "Word: ${result.data?.get(0)?.questionWord}")
-                        Log.d("GameScreen", "Meaning: ${result.data?.get(0)?.answerMeaning}")
                     }
                 }
             }

@@ -16,6 +16,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.oolong.riddle_game.Screen
 import com.oolong.riddle_game.ui.component.letter_indicator.LetterIndicator
 import com.oolong.riddle_game.ui.screen.game_screen.GameScreen
 import com.oolong.riddle_game.ui.screen.splash_screen.SplashScreen
@@ -28,13 +32,35 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
             RiddlegameTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.SplashScreen.route
+                    ) {
+                        composable(
+                            route = Screen.SplashScreen.route
+                        ) {
+                            SplashScreen(
+                                navController = navController
+                            )
+                        }
+
+                        composable(
+                            route = Screen.GameScreen.route
+                        ) {
+                            GameScreen(
+                                navController = navController
+                            )
+                        }
+                    }
+
 //                    SplashScreen()
-                    GameScreen()
+//                    GameScreen()
                 }
             }
         }
