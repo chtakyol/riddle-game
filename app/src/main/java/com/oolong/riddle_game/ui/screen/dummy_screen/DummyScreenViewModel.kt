@@ -5,31 +5,32 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oolong.riddle_game.domain.usecase.GetSingleQuizDataUseCase
+import com.oolong.riddle_game.domain.usecase.GetQuizDataFromLocalUseCase
 import com.oolong.riddle_game.domain.usecase.GetWordInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class DummyScreenViewModel @Inject constructor(
     private val getWordInfoUseCase: GetWordInfoUseCase,
-    private val getQuizData: GetSingleQuizDataUseCase
+    private val getQuizData: GetQuizDataFromLocalUseCase
 ): ViewModel() {
     private val _uiState = mutableStateOf("")
     val uiState: State<String> = _uiState
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
 //            getWordInfoUseCase("dinosaur").collect {
 //                Log.d("Dummy", it[0].word.toString())
 //                Log.d("Dummy", it.size.toString())
 //                _uiState.value = it[0].meanings[0].definitions[0].definition.toString()
 //            }
-            getQuizData("data").collect {
-                Log.d("Dummy", it.questionWord)
-                Log.d("Dummy", it.answerMeaning)
-            }
+//            getQuizData("data").collect {
+//                Log.d("Dummy", it.questionWord)
+//                Log.d("Dummy", it.answerMeaning)
+//            }
         }
     }
 }

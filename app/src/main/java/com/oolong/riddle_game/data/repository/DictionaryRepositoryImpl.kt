@@ -19,9 +19,12 @@ class DictionaryRepositoryImpl @Inject constructor(
     // TODO inject app utility data
 ): IDictionaryRepository {
 
-    override suspend fun getWordInfo(word: String): DictionaryApiResponse {
-        Log.d("Dummy", word)
-        return dictionaryApi.getWordInfo(word)
+    override suspend fun getQuizData(): Flow<Resource<List<QuizDataEntity>>> {
+        val quizData = dao.getQuizData()
+        val resource = Resource.Success(data = quizData)
+        return flow {
+            emit(resource)
+        }
     }
 
     override suspend fun getWordToDB(words: List<String>): Flow<Resource<List<QuizDataEntity>>> {

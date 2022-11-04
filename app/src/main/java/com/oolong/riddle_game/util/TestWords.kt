@@ -17,12 +17,14 @@ val testWords = listOf(
     "nervous",
     "object",
     "particular",
+    "qualify",
     "reduction",
     "situation",
     "tear",
     "upper",
     "virus",
     "wander",
+    "xenon",
     "year",
     "zone"
 )

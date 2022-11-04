@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface IDictionaryRepository {
 
-    suspend fun getWordInfo(word: String): DictionaryApiResponse
+    suspend fun getQuizData(): Flow<Resource<List<QuizDataEntity>>>
 
     suspend fun getWordToDB(words: List<String>): Flow<Resource<List<QuizDataEntity>>>
 }

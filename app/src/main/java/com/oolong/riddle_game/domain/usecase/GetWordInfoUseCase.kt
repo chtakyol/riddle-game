@@ -11,8 +11,8 @@ class GetWordInfoUseCase @Inject constructor(
 ) {
 
     operator fun invoke(word: String): Flow<DictionaryApiResponse> = flow {
-        emit(
-            dictionaryRepository.getWordInfo(word)
-        )
+//        emit(
+//            dictionaryRepository.getWordInfo(word)
+//        )
     }
 }

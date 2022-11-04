@@ -2,12 +2,11 @@ package com.oolong.riddle_game.di
 
 import android.app.Application
 import androidx.room.Room
-import com.oolong.riddle_game.data.local.QuizDataDao
 import com.oolong.riddle_game.data.local.QuizDataDataBase
 import com.oolong.riddle_game.data.remote.DictionaryApi
 import com.oolong.riddle_game.data.repository.DictionaryRepositoryImpl
 import com.oolong.riddle_game.domain.repository.IDictionaryRepository
-import com.oolong.riddle_game.domain.usecase.GetSingleQuizDataUseCase
+import com.oolong.riddle_game.domain.usecase.GetQuizDataFromLocalUseCase
 import com.oolong.riddle_game.domain.usecase.GetWordInfoUseCase
 import dagger.Module
 import dagger.Provides
@@ -37,11 +36,11 @@ object RepositoryModule {
         return GetWordInfoUseCase(repository)
     }
 
-    @Provides
-    @Singleton
-    fun provideGetQuizDataUseCase(repository: IDictionaryRepository): GetSingleQuizDataUseCase {
-        return GetSingleQuizDataUseCase(repository)
-    }
+//    @Provides
+//    @Singleton
+//    fun provideGetQuizDataUseCase(repository: IDictionaryRepository): GetQuizDataFromLocalUseCase {
+//        return GetQuizDataFromLocalUseCase(repository)
+//    }
 
     @Provides
     @Singleton
