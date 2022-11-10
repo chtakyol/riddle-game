@@ -5,8 +5,11 @@ import com.oolong.riddle_game.data.local.QuizDataDao
 import com.oolong.riddle_game.data.local.QuizDataEntity
 import com.oolong.riddle_game.data.model.DictionaryApiResponse
 import com.oolong.riddle_game.data.remote.DictionaryApi
+import com.oolong.riddle_game.domain.model.SingleQuizData
 import com.oolong.riddle_game.domain.repository.IDictionaryRepository
 import com.oolong.riddle_game.util.Resource
+import com.oolong.riddle_game.util.changeMissingWord
+import com.oolong.riddle_game.util.prepareTestWords
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
@@ -19,39 +22,20 @@ class DictionaryRepositoryImpl @Inject constructor(
     // TODO inject app utility data
 ): IDictionaryRepository {
 
-    override suspend fun getQuizData(): Flow<Resource<List<QuizDataEntity>>> {
-        val quizData = dao.getQuizData()
-        val resource = Resource.Success(data = quizData)
-        return flow {
-            emit(resource)
+    override suspend fun getWordInfoFromRemote(word: String): SingleQuizData {
+        return dictionaryApi.getWordInfo(word).toQuestionData()
+    }
+
+    override suspend fun saveQuizDataToLocal(quizDataEntities: List<QuizDataEntity>) {
+        dao.clearQuizData()
+        for (quizDataEntity in quizDataEntities) {
+            dao.insertQuizData(quizDataEntity)
         }
     }
 
-    override suspend fun getWordToDB(words: List<String>): Flow<Resource<List<QuizDataEntity>>> {
-        dao.clearQuizData()
-        Log.d("SplashScreen", "Removed old data")
-        var resource: Resource<List<QuizDataEntity>>
-        try {
-            for (word in words) {
-                val questionData = dictionaryApi.getWordInfo(word).toQuestionData()
-                dao.insertQuizData(
-                    QuizDataEntity(
-                        questionWord = questionData.questionWord,
-                        answerMeaning = questionData.answerMeaning
-                    )
-                )
-            }
-            Log.d("SplashScreen", "New data pulled")
-        } catch (e: HttpException) {
-            resource = Resource.Error(errorMessage = "Error: $e")
-        } catch (e: IOException) {
-            resource = Resource.Error(errorMessage = "Error: $e")
-
-        }
+    override suspend fun getQuizData(): Flow<Resource<List<QuizDataEntity>>> {
         val quizData = dao.getQuizData()
-        resource = Resource.Success(data = quizData)
-        Log.d("SplashScreen", resource.data.toString())
-
+        val resource = Resource.Success(data = quizData)
         return flow {
             emit(resource)
         }

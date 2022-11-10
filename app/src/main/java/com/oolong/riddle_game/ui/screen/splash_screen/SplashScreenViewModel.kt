@@ -5,22 +5,23 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oolong.riddle_game.domain.usecase.GetAllQuizDataUseCase
+import com.oolong.riddle_game.data.local.QuizDataEntity
+import com.oolong.riddle_game.domain.usecase.GetSingleQuizDataUseCase
+import com.oolong.riddle_game.domain.usecase.SaveQuizDataUseCase
 import com.oolong.riddle_game.util.Resource
-import com.oolong.riddle_game.util.testWords
+import com.oolong.riddle_game.util.changeMissingWord
+import com.oolong.riddle_game.util.prepareTestWords
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashScreenViewModel @Inject constructor(
-    private val getAllQuizDataUseCase: GetAllQuizDataUseCase
+    private val getSingleQuizDataUseCase: GetSingleQuizDataUseCase,
+    private val saveQuizDataUseCase: SaveQuizDataUseCase
 ): ViewModel() {
 
     private val _splashScreenState = mutableStateOf(SplashScreenState(emptyList()))
@@ -29,24 +30,59 @@ class SplashScreenViewModel @Inject constructor(
     private val _splashScreenNavigationEvent = MutableSharedFlow<SplashScreenNavigationEvent>()
     val splashScreenNavigationEvent: SharedFlow<SplashScreenNavigationEvent> = _splashScreenNavigationEvent
 
+    private var testWords: MutableList<String> = mutableListOf()
+    private var missingLetterIndexes: MutableList<Int> = mutableListOf()
+    private var quizDataEntities: MutableList<QuizDataEntity> = mutableListOf()
+
     init {
+        testWords = prepareTestWords()
         viewModelScope.launch(Dispatchers.IO) {
-            getAllQuizDataUseCase(testWords).collect{ result ->
-                when(result) {
+            prepareQuizDataEntities(testWords)
+            while (missingLetterIndexes.isNotEmpty()) {
+                changeMissingWords(missingLetterIndexes)
+                prepareQuizDataEntities(testWords)
+            }
+            saveQuizDataUseCase(quizDataEntities)
+            _splashScreenNavigationEvent.emit(
+                SplashScreenNavigationEvent.NavigateToGameScreen
+            )
+        }
+    }
+
+    private suspend fun prepareQuizDataEntities(testWords: List<String>) {
+        missingLetterIndexes.clear()
+        for ((index, word) in testWords.withIndex()) {
+            getSingleQuizDataUseCase(word).collect { result ->
+                when (result) {
                     is Resource.Error -> {
-                        result.errorMessage?.let { Log.d("SplashScreen", it) }
+                        Log.d("SplashScreen", "${result.errorMessage}")
+                        missingLetterIndexes.add(index)
                     }
-                    is Resource.Loading -> { }
+                    is Resource.Loading -> {
+                        Log.d("SplashScreen", "Waiting result for '$word' with index $index.")
+                    }
                     is Resource.Success -> {
-                        _splashScreenState.value = splashScreenState.value.copy(
-                            quizData = result.data
-                        )
-                        _splashScreenNavigationEvent.emit(
-                            SplashScreenNavigationEvent.NavigateToGameScreen
+                        Log.d("SplashScreen", "${result.data}")
+                        quizDataEntities.add(
+                            QuizDataEntity(
+                                questionWord = result.data?.questionWord ?: "",
+                                answerMeaning = result.data?.answerMeaning ?: ""
+                            )
                         )
                     }
                 }
             }
         }
+
+        Log.d("SplashScreen", "$missingLetterIndexes couldn't found on remote.")
+        Log.d("SplashScreen", "These entities going to save to local $quizDataEntities")
+    }
+
+    private fun changeMissingWords(indexes: List<Int>) {
+        Log.d("SplashScreen", "Test Words: $testWords")
+        for(missingIndex in indexes) {
+            testWords = changeMissingWord(missingIndex)
+        }
+        Log.d("SplashScreen", "Test Words: $testWords")
     }
 }
