@@ -22,6 +22,8 @@ class GameScreenViewModel @Inject constructor(
     private val _uiState = mutableStateOf(GameScreenState())
     val uiState: State<GameScreenState> = _uiState
 
+    private val passedWordList: MutableList<Int> = mutableListOf()
+
     init {
         getQuizData()
     }
@@ -55,6 +57,7 @@ class GameScreenViewModel @Inject constructor(
     private fun onPass() {
         updateLetterIndicator(_uiState.value.index, LetterIndicatorState.PASSED)
         val currentIndex = _uiState.value.index
+        passedWordList.add(currentIndex)
         _uiState.value = uiState.value.copy(
             index = currentIndex + 1,
             answer = ""
@@ -70,11 +73,13 @@ class GameScreenViewModel @Inject constructor(
 
     private fun goNextWord() {
         val currentIndex = _uiState.value.index
+        if (currentIndex < 25) {
             _uiState.value = uiState.value.copy(
-            index = currentIndex + 1,
-            answer = ""
-        )
-        updateLetterIndicator(currentIndex + 1, LetterIndicatorState.ACTIVE)
+                index = currentIndex + 1,
+                answer = ""
+            )
+            updateLetterIndicator(currentIndex + 1, LetterIndicatorState.ACTIVE)
+        }
     }
 
     private fun checkAnswer(): Boolean {
