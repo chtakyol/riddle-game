@@ -47,7 +47,6 @@ class GameScreenViewModel @Inject constructor(
             GameScreenEvent.RemoveClicked -> {
                 onRemove()
             }
-
             GameScreenEvent.PassClicked -> {
                 onPass()
             }
@@ -57,12 +56,22 @@ class GameScreenViewModel @Inject constructor(
     private fun onPass() {
         updateLetterIndicator(_uiState.value.index, LetterIndicatorState.PASSED)
         val currentIndex = _uiState.value.index
-        passedWordList.add(currentIndex)
-        _uiState.value = uiState.value.copy(
-            index = currentIndex + 1,
-            answer = ""
-        )
-        updateLetterIndicator(currentIndex + 1, LetterIndicatorState.ACTIVE)
+        val currentState = getLetterIndicator(currentIndex)
+        if (currentIndex < 25) {
+            passedWordList.add(currentIndex)
+            _uiState.value = uiState.value.copy(
+                index = currentIndex + 1,
+                answer = ""
+            )
+            if (currentState == LetterIndicatorState.EMPTY) {
+                updateLetterIndicator(currentIndex + 1, LetterIndicatorState.ACTIVE)
+            }
+        } else {
+            _uiState.value = uiState.value.copy(
+                index = passedWordList[currentIndex%25],
+                answer = ""
+            )
+        }
     }
 
     private fun onRemove() {
@@ -73,12 +82,18 @@ class GameScreenViewModel @Inject constructor(
 
     private fun goNextWord() {
         val currentIndex = _uiState.value.index
+        val currentState = getLetterIndicator(currentIndex)
         if (currentIndex < 25) {
             _uiState.value = uiState.value.copy(
                 index = currentIndex + 1,
                 answer = ""
             )
-            updateLetterIndicator(currentIndex + 1, LetterIndicatorState.ACTIVE)
+            if (currentState == LetterIndicatorState.EMPTY) {
+                updateLetterIndicator(currentIndex + 1, LetterIndicatorState.ACTIVE)
+            } else {
+                passedWordList.remove(currentIndex)
+                Log.d("GameScreen", "Index $passedWordList")
+            }
         }
     }
 
@@ -103,6 +118,12 @@ class GameScreenViewModel @Inject constructor(
         _uiState.value = uiState.value.copy(
             letterIndicatorState = currentIndicatorStates
         )
+    }
+
+    private fun getLetterIndicator(index: Int): LetterIndicatorState? {
+        val currentIndicatorStates = uiState.value.letterIndicatorState
+        val letterList = currentIndicatorStates.keys.toList()
+        return currentIndicatorStates[letterList[index]]
     }
 
     private fun updateAnswer(letter: String) {
