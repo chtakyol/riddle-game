@@ -6,13 +6,5 @@ val xWords = listOf(
     "xenophobia",
     "xenophobic",
     "xerography",
-    "xhosa",
-    "xhosas",
-    "xmas",
-    "xray",
-    "xrayed",
-    "xraying",
-    "xrays",
-    "xylophone",
-    "xylophonist",
+    "xylophone"
 )
