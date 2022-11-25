@@ -1,16 +1,21 @@
 package com.oolong.riddle_game.di
 
 import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import com.oolong.riddle_game.data.local.QuizDataDataBase
+import com.oolong.riddle_game.data.local.appUtilityData
 import com.oolong.riddle_game.data.remote.DictionaryApi
+import com.oolong.riddle_game.data.repository.AppUtilityDataRepositoryImpl
 import com.oolong.riddle_game.data.repository.DictionaryRepositoryImpl
+import com.oolong.riddle_game.domain.IAppUtilityDataRepository
 import com.oolong.riddle_game.domain.repository.IDictionaryRepository
 import com.oolong.riddle_game.domain.usecase.GetQuizDataFromLocalUseCase
 import com.oolong.riddle_game.domain.usecase.GetWordInfoUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -51,4 +56,10 @@ object RepositoryModule {
             QuizDataDataBase.DATABASE_NAME
         ).build()
     }
+
+    @Provides
+    @Singleton
+    fun provideUtilityData(
+        @ApplicationContext app: Context
+    ): IAppUtilityDataRepository = AppUtilityDataRepositoryImpl(app.appUtilityData)
 }

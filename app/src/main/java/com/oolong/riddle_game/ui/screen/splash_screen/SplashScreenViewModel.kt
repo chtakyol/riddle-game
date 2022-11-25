@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oolong.riddle_game.data.local.QuizDataEntity
+import com.oolong.riddle_game.domain.IAppUtilityDataRepository
 import com.oolong.riddle_game.domain.usecase.GetSingleQuizDataUseCase
 import com.oolong.riddle_game.domain.usecase.SaveQuizDataUseCase
 import com.oolong.riddle_game.util.Resource
@@ -13,15 +14,19 @@ import com.oolong.riddle_game.util.changeMissingWord
 import com.oolong.riddle_game.util.prepareTestWords
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashScreenViewModel @Inject constructor(
     private val getSingleQuizDataUseCase: GetSingleQuizDataUseCase,
-    private val saveQuizDataUseCase: SaveQuizDataUseCase
+    private val saveQuizDataUseCase: SaveQuizDataUseCase,
+    private val getUtilityData: IAppUtilityDataRepository
 ): ViewModel() {
 
     private val _splashScreenState = mutableStateOf(SplashScreenState(emptyList()))
@@ -34,15 +39,36 @@ class SplashScreenViewModel @Inject constructor(
     private var missingLetterIndexes: MutableList<Int> = mutableListOf()
     private var quizDataEntities: MutableList<QuizDataEntity> = mutableListOf()
 
+    private var shouldLoadNewWord = false
+
     init {
+        getCurrentDay()
         testWords = prepareTestWords()
         viewModelScope.launch(Dispatchers.IO) {
-            prepareQuizDataEntities(testWords)
-            while (missingLetterIndexes.isNotEmpty()) {
-                changeMissingWords(missingLetterIndexes)
+            getUtilityData.getAppUtilityData(
+                onSuccess = {
+                    Log.d("SplashScreen", "Same Day")
+                    if (getCurrentDay() != it.lastDateRemoteGet) {
+                        shouldLoadNewWord = true
+                    }
+                },
+                onError = { }
+            )
+
+            if (shouldLoadNewWord) {
                 prepareQuizDataEntities(testWords)
+                while (missingLetterIndexes.isNotEmpty()) {
+                    changeMissingWords(missingLetterIndexes)
+                    prepareQuizDataEntities(testWords)
+                }
+                saveQuizDataUseCase(quizDataEntities)
+                getUtilityData.updateAppUtilityData(
+                    onSuccess = { },
+                    onError = { },
+                    lastDateRemoteGet = getCurrentDay()
+                )
             }
-            saveQuizDataUseCase(quizDataEntities)
+            delay(100)
             _splashScreenNavigationEvent.emit(
                 SplashScreenNavigationEvent.NavigateToGameScreen
             )
@@ -84,5 +110,10 @@ class SplashScreenViewModel @Inject constructor(
             testWords = changeMissingWord(missingIndex)
         }
         Log.d("SplashScreen", "Test Words: $testWords")
+    }
+
+    private fun getCurrentDay(): String {
+        val sdf = SimpleDateFormat("dd/M/yyyy")
+        return sdf.format(Date())
     }
 }
