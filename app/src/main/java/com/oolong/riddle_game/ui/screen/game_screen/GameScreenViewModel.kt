@@ -1,5 +1,6 @@
 package com.oolong.riddle_game.ui.screen.game_screen
 
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +24,8 @@ class GameScreenViewModel @Inject constructor(
     val uiState: State<GameScreenState> = _uiState
 
     private val passedWordList: MutableList<Int> = mutableListOf()
+
+    private var countDownTimer: CountDownTimer? = null
 
     init {
         getQuizData()
@@ -49,6 +52,12 @@ class GameScreenViewModel @Inject constructor(
             }
             GameScreenEvent.PassClicked -> {
                 onPass()
+            }
+            GameScreenEvent.PlayClicked -> {
+                _uiState.value = uiState.value.copy(
+                    isGameStarted = true
+                )
+                startTimer()
             }
         }
     }
@@ -130,6 +139,24 @@ class GameScreenViewModel @Inject constructor(
         _uiState.value = uiState.value.copy(
             answer = _uiState.value.answer + letter
         )
+    }
+
+    private fun startTimer() {
+        val isGameStarted = uiState.value.isGameStarted
+        if (isGameStarted) {
+            countDownTimer = object : CountDownTimer(60000L, 1000) {
+
+                override fun onTick(millisRemaining: Long) {
+                }
+
+                override fun onFinish() {
+                    _uiState.value = uiState.value.copy(
+                        isGameStarted = false
+                    )
+                    countDownTimer?.cancel()
+                }
+            }.start()
+        }
     }
 
     private fun getQuizData() {

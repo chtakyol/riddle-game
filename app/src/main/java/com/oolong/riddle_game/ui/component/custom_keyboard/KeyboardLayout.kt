@@ -1,11 +1,14 @@
 package com.oolong.riddle_game.ui.component.custom_keyboard
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.oolong.riddle_game.R
 
 @Composable
 fun KeyboardLayout(
@@ -59,33 +62,44 @@ fun KeyboardLayout(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
         ) {
+            FunctionalButton(
+                letter = "Remove",
+                icon = painterResource(id = R.drawable.ic_baseline_backspace_24),
+                onClick = onRemoveClicked
+            )
+
             for (letter in row3Letters) {
                 KeyboardButton(
                     letter = letter,
                     onClick = onClick
                 )
             }
-        }
 
-        Row(
-            modifier = modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
-        ) {
-            FunctionalButton(
-                letter = "Remove",
-                onClick = onRemoveClicked
-            )
-            FunctionalButton(
-                letter = "Pass",
-                onClick = onPassClicked
-            )
             FunctionalButton(
                 letter = "OK",
+                icon = painterResource(id = R.drawable.ic_baseline_check_24),
                 onClick = onEnterClicked
             )
         }
+//        Row(
+//            modifier = modifier
+//                .fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
+//        ) {
+//            FunctionalButton(
+//                letter = "Remove",
+//                onClick = onRemoveClicked
+//            )
+//            FunctionalButton(
+//                letter = "Pass",
+//                onClick = onPassClicked
+//            )
+//            FunctionalButton(
+//                letter = "OK",
+//                onClick = onEnterClicked
+//            )
+//        }
     }
 }
 

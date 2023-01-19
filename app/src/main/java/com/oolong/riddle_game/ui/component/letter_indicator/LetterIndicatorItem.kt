@@ -1,6 +1,7 @@
 package com.oolong.riddle_game.ui.component.letter_indicator
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
@@ -33,16 +34,25 @@ fun LetterIndicatorItem(
         LetterIndicatorState.CORRECT -> { Color(0xFF7DA388) }
         LetterIndicatorState.WRONG -> { Color(0xFFDF585F) }
         LetterIndicatorState.PASSED -> { Color(0xFFD3AF38) }
-        LetterIndicatorState.EMPTY -> { MaterialTheme.colors.background }
+        LetterIndicatorState.EMPTY -> { Color(0xFFF1F2F2) }
+    }
+
+    val borderColor = when (state) {
+        LetterIndicatorState.ACTIVE -> { Color.Black }
+        LetterIndicatorState.PASSIVE -> { Color(0xFFC5C5C5) }
+        LetterIndicatorState.CORRECT -> { Color(0xFF7DA388) }
+        LetterIndicatorState.WRONG -> { Color(0xFFDF585F) }
+        LetterIndicatorState.PASSED -> { Color(0xFFD3AF38) }
+        LetterIndicatorState.EMPTY -> { Color(0xFFF1F2F2) }
     }
 
     val textColor = when (state) {
         LetterIndicatorState.ACTIVE -> { Color.Black }
-        LetterIndicatorState.PASSIVE -> { Color.Gray }
+        LetterIndicatorState.PASSIVE -> { Color(0xFF696969) }
         LetterIndicatorState.CORRECT -> { Color.White }
         LetterIndicatorState.WRONG -> { Color.White }
         LetterIndicatorState.PASSED -> { Color.White }
-        LetterIndicatorState.EMPTY -> { Color.LightGray }
+        LetterIndicatorState.EMPTY -> { Color(0xFFF1F2F2) }
     }
 
     Box(
@@ -50,6 +60,7 @@ fun LetterIndicatorItem(
         modifier = Modifier
             .clip(RoundedCornerShape(64.dp))
             .size(width = 64.dp, height = 64.dp)
+            .border(1.dp, borderColor, RoundedCornerShape(64.dp))
             .background(backgroundColor)
     ) {
         Text(

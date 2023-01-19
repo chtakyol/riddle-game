@@ -36,4 +36,5 @@ data class GameScreenState(
     val quizData: List<QuizDataEntity>? = null,
     val answer: String = "",
     val remainingTime: Long? = null,
+    val isGameStarted: Boolean = false
 )

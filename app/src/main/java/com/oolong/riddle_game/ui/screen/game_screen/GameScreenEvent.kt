@@ -5,4 +5,5 @@ sealed class GameScreenEvent {
     object EnterClicked: GameScreenEvent()
     object RemoveClicked: GameScreenEvent()
     object PassClicked: GameScreenEvent()
+    object PlayClicked: GameScreenEvent()
 }

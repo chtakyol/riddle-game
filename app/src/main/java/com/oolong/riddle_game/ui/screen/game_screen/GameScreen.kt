@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.oolong.riddle_game.ui.component.custom_keyboard.KeyboardLayout
 import com.oolong.riddle_game.ui.component.letter_indicator.LetterIndicator
+import com.oolong.riddle_game.ui.screen.game_screen.components.PreGameOverlay
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -33,59 +34,67 @@ fun GameScreen(
     val coroutineScope = rememberCoroutineScope()
     val listState: LazyListState = rememberLazyListState()
     val state = viewModel.uiState.value
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        LetterIndicator(
-            listState = listState,
-            letterIndicatorState = state.letterIndicatorState,
-            index = state.index
-        )
-        Text(
-            modifier = Modifier.weight(2f),
 
-            textAlign = TextAlign.Center,
-            text = state.quizData?.get(state.index)?.answerMeaning?.uppercase() ?: "Question"
-        )
-        Text(
-            textAlign = TextAlign.Center,
-            text = state.answer.uppercase()
-        )
-        Text(
-            text = state.quizData?.get(state.index)?.questionWord?.uppercase() ?: "Word"
-        )
+    if (state.isGameStarted) {
         Column(
-            modifier = Modifier.weight(2f),
-            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            KeyboardLayout(
-                onRemoveClicked = {
-                    viewModel.onEvent(GameScreenEvent.RemoveClicked)
-                },
-                onEnterClicked = {
-                    viewModel.onEvent(GameScreenEvent.EnterClicked)
-                    coroutineScope.launch {
-                        delay(100L)
-                        listState.animateScrollToItem(viewModel.uiState.value.index)
+            LetterIndicator(
+                listState = listState,
+                letterIndicatorState = state.letterIndicatorState,
+                index = state.index
+            )
+            Text(
+                modifier = Modifier.weight(2f),
+
+                textAlign = TextAlign.Center,
+                text = state.quizData?.get(state.index)?.answerMeaning?.uppercase() ?: "Question"
+            )
+            Text(
+                textAlign = TextAlign.Center,
+                text = state.answer.uppercase()
+            )
+            Text(
+                text = state.quizData?.get(state.index)?.questionWord?.uppercase() ?: "Word"
+            )
+            Column(
+                modifier = Modifier.weight(2f),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                KeyboardLayout(
+                    onRemoveClicked = {
+                        viewModel.onEvent(GameScreenEvent.RemoveClicked)
+                    },
+                    onEnterClicked = {
+                        viewModel.onEvent(GameScreenEvent.EnterClicked)
+                        coroutineScope.launch {
+                            delay(100L)
+                            listState.animateScrollToItem(viewModel.uiState.value.index)
+                        }
+                    },
+                    onPassClicked = {
+                        viewModel.onEvent(GameScreenEvent.PassClicked)
+                        coroutineScope.launch {
+                            delay(100L)
+                            listState.animateScrollToItem(viewModel.uiState.value.index)
+                        }
                     }
-                },
-                onPassClicked = {
-                    viewModel.onEvent(GameScreenEvent.PassClicked)
-                    coroutineScope.launch {
-                        delay(100L)
-                        listState.animateScrollToItem(viewModel.uiState.value.index)
-                    }
+                ){ letter ->
+                    viewModel.onEvent(GameScreenEvent.KeyboardInput(letter))
                 }
-            ){ letter ->
-                viewModel.onEvent(GameScreenEvent.KeyboardInput(letter))
             }
         }
+    } else {
+        PreGameOverlay() {
+            viewModel.onEvent(GameScreenEvent.PlayClicked)
+        }
     }
+
 }
 
 @Composable
